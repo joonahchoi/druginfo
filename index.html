@@ -576,7 +576,6 @@
     
     <script>
         // API 키 (여기에 실제 API 키를 입력하세요)
-        let API_KEY = localStorage.getItem('apiKey') || '';
         const API_URL = 'https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList';
         
         // 로컬 스토리지 초기화
@@ -588,19 +587,7 @@
             lastDate: new Date().toDateString(),
             keywords: {}
         };
-        
-        // API 키 저장
-        function saveApiKey() {
-            const key = document.getElementById('apiKey').value.trim();
-            if (key) {
-                API_KEY = key;
-                localStorage.setItem('apiKey', key);
-                alert('API 키가 저장되었습니다!');
-                document.querySelector('.api-key-section').style.display = 'none';
-            } else {
-                alert('API 키를 입력해주세요.');
-            }
-        }
+
         
         // 페이지 로드 시 초기화
         window.onload = function() {
