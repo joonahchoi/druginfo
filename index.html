@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 건강지킴이 - 건강정보 탐색소</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background: #4caf50;
+        }
+        
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-chip {
+            padding: 8px 16px;
+            background: #e8eaf6;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-chip.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .results-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .medicine-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .medicine-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .medicine-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .medicine-company {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .medicine-info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .search-history {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checklist {
+            background: #f0f8ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .checklist h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .checklist-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .checklist-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .symptom-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .symptom-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .symptom-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .note-section {
+            background: #fffbf0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .note-item {
+            padding: 15px;
+            background: white;
+            margin: 10px 0;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .note-date {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .delete-note {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .api-key-section {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px dashed #ff9800;
+        }
+        
+        .api-key-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 스마트 건강지킴이</h1>
+            <p class="subtitle">믿을 수 있는 건강정보를 찾아보세요!</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- API 키 입력 섹션 -->
+            <div class="api-key-section">
+                <h3>⚠️ API 키 설정</h3>
+                <p>공공데이터포털에서 발급받은 API 키를 입력해주세요.</p>
+                <input type="text" class="api-key-input" id="apiKey" placeholder="여기에 API 키를 입력하세요">
+                <button class="btn" onclick="saveApiKey()" style="margin-top: 10px;">저장</button>
+            </div>
+            
+            <!-- 탭 메뉴 -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('search')">🔍 의약품 검색</button>
+                <button class="tab" onclick="showTab('symptom')">🩺 증상별 찾기</button>
+                <button class="tab" onclick="showTab('mynote')">📝 나의 건강노트</button>
+                <button class="tab" onclick="showTab('checklist')">✅ 건강정보 체크리스트</button>
+                <button class="tab" onclick="showTab('stats')">📊 통계보기</button>
+            </div>
+            
+            <!-- 의약품 검색 탭 -->
+            <div id="search" class="tab-content active">
+                <div class="search-section">
+                    <h2>의약품 정보 검색</h2>
+                    <p style="color: #666; margin: 10px 0;">집에 있는 약의 이름을 검색해보세요!</p>
+                    
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="예: 타이레놀, 부루펜, 게보린 등">
+                        <button class="btn" onclick="searchMedicine()">검색하기</button>
+                    </div>
+                    
+                    <div class="search-filters">
+                        <span style="margin-right: 10px;">빠른 검색:</span>
+                        <div class="filter-chip" onclick="quickSearch('타이레놀')">타이레놀</div>
+                        <div class="filter-chip" onclick="quickSearch('부루펜')">부루펜</div>
+                        <div class="filter-chip" onclick="quickSearch('게보린')">게보린</div>
+                        <div class="filter-chip" onclick="quickSearch('아스피린')">아스피린</div>
+                    </div>
+                    
+                    <div id="searchResults" class="results-container" style="display: none;">
+                        <!-- 검색 결과가 여기에 표시됩니다 -->
+                    </div>
+                    
+                    <div class="search-history">
+                        <h3>최근 검색 기록</h3>
+                        <div id="searchHistory">
+                            <p style="color: #999;">아직 검색 기록이 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 증상별 찾기 탭 -->
+            <div id="symptom" class="tab-content">
+                <h2>증상별 의약품 찾기</h2>
+                <p style="color: #666; margin: 10px 0;">어떤 증상이 있나요? 해당하는 버튼을 클릭해보세요!</p>
+                
+                <div class="symptom-buttons">
+                    <button class="symptom-btn" onclick="searchBySymptom('두통')">🤕 두통</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('감기')">🤧 감기</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('소화')">🤢 소화불량</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('알레르기')">🤧 알레르기</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('근육통')">💪 근육통</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('기침')">😷 기침</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('비염')">👃 비염</button>
+                    <button class="symptom-btn" onclick="searchBySymptom('피부')">🩹 피부질환</button>
+                </div>
+                
+                <div id="symptomResults" class="results-container" style="display: none;">
+                    <!-- 증상별 검색 결과가 여기에 표시됩니다 -->
+                </div>
+            </div>
+            
+            <!-- 나의 건강노트 탭 -->
+            <div id="mynote" class="tab-content">
+                <h2>나의 건강노트</h2>
+                <p style="color: #666; margin: 10px 0;">검색한 의약품 정보를 저장하고 관리해보세요!</p>
+                
+                <button class="btn btn-secondary" onclick="downloadNotes()">📥 노트 다운로드 (TXT)</button>
+                
+                <div class="note-section">
+                    <h3>저장된 의약품 정보</h3>
+                    <div id="savedNotes">
+                        <p style="color: #999;">아직 저장된 정보가 없습니다.</p>
+                    </div>
+                </div>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-number" id="searchCount">0</div>
+                        <div class="stat-label">총 검색 횟수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="savedCount">0</div>
+                        <div class="stat-label">저장된 약품</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 건강정보 체크리스트 탭 -->
+            <div id="checklist" class="tab-content">
+                <h2>올바른 건강정보 선택을 위한 체크리스트</h2>
+                
+                <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px;">🤔 건강정보란?</h3>
+                    <p>건강정보는 우리의 건강을 유지하고 개선하는 데 필요한 모든 정보를 말합니다. 
+                    인터넷에는 수많은 건강정보가 있지만, 모든 정보가 정확하고 믿을 만한 것은 아닙니다. 
+                    그래서 올바른 건강정보를 선택하는 능력이 중요해요!</p>
+                </div>
+                
+                <div class="checklist">
+                    <h3>✅ 건강정보 평가 체크리스트</h3>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">1️⃣ 적합성</div>
+                        <p>원하는 건강 정보의 목적과 내용에 맞는가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 두통약을 찾는데 위장약 정보가 나온다면 적합하지 않아요!</p>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">2️⃣ 신뢰성</div>
+                        <p>정보의 출처가 전문가, 비영리단체 등으로 믿을만한가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 식약처, 병원, 의사 등 전문기관의 정보는 신뢰할 수 있어요!</p>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">3️⃣ 정확성</div>
+                        <p>과학적 근거가 있는 정확한 정보인가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 연구결과나 임상시험 데이터가 있는 정보가 더 정확해요!</p>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">4️⃣ 유효성</div>
+                        <p>활용할 가치가 있는 정보인가? 해당 정보를 활용하여 목적하는 효과를 얻을 수 있는가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 실제로 도움이 되는 실용적인 정보인지 확인해보세요!</p>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">5️⃣ 최신성</div>
+                        <p>최신 정보인가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 의학 정보는 계속 발전하므로 최근 업데이트된 정보가 좋아요!</p>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <div class="checklist-title">6️⃣ 경제성</div>
+                        <p>시간, 자원, 비용, 노력 등을 최소화하면서도 원하는 효과를 얻을 수 있는가?</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 5px;">
+                        💡 예시: 너무 비싸거나 복잡한 방법보다는 간단하고 효율적인 방법을 찾아보세요!</p>
+                    </div>
+                </div>
+                
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h3 style="color: #f57c00;">🎯 이 사이트의 정보는 믿을 수 있어요!</h3>
+                    <p>우리가 사용하는 의약품 정보는 <strong>식품의약품안전처</strong>에서 제공하는 
+                    공식 데이터입니다. 정부기관에서 검증한 정확한 정보만 제공하므로 안심하고 활용하세요!</p>
+                </div>
+            </div>
+            
+            <!-- 통계 탭 -->
+            <div id="stats" class="tab-content">
+                <h2>📊 나의 건강정보 활용 통계</h2>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSearchStat">0</div>
+                        <div class="stat-label">총 검색 횟수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="todaySearchStat">0</div>
+                        <div class="stat-label">오늘 검색 횟수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="savedMedicineStat">0</div>
+                        <div class="stat-label">저장된 의약품</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="mostSearchedStat">-</div>
+                        <div class="stat-label">가장 많이 검색한 약</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>🏆 건강정보 마스터 레벨</h3>
+                    <div style="margin-top: 15px;">
+                        <div id="userLevel" style="font-size: 1.5em; font-weight: bold; color: #667eea;">초보 탐색자</div>
+                        <div style="background: #e0e0e0; height: 30px; border-radius: 15px; margin-top: 10px; overflow: hidden;">
+                            <div id="levelProgress" style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                        </div>
+                        <p style="margin-top: 10px; color: #666;">검색을 많이 할수록 레벨이 올라가요!</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 10px;">
+                    <h3>📈 검색 키워드 TOP 5</h3>
+                    <div id="topKeywords" style="margin-top: 15px;">
+                        <p style="color: #999;">아직 검색 기록이 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API 키 (여기에 실제 API 키를 입력하세요)
+        let API_KEY = localStorage.getItem('apiKey') || '';
+        const API_URL = 'https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList';
+        
+        // 로컬 스토리지 초기화
+        let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        let savedNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
+        let searchStats = JSON.parse(localStorage.getItem('searchStats')) || {
+            total: 0,
+            today: 0,
+            lastDate: new Date().toDateString(),
+            keywords: {}
+        };
+        
+        // API 키 저장
+        function saveApiKey() {
+            const key = document.getElementById('apiKey').value.trim();
+            if (key) {
+                API_KEY = key;
+                localStorage.setItem('apiKey', key);
+                alert('API 키가 저장되었습니다!');
+                document.querySelector('.api-key-section').style.display = 'none';
+            } else {
+                alert('API 키를 입력해주세요.');
+            }
+        }
+        
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            if (API_KEY) {
+                document.getElementById('apiKey').value = API_KEY;
+                document.querySelector('.api-key-section').style.display = 'none';
+            }
+            updateSearchHistory();
+            updateSavedNotes();
+            updateStats();
+        };
+        
+        // 탭 전환
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        // 의약품 검색
+        async function searchMedicine() {
+            if (!API_KEY) {
+                alert('먼저 API 키를 입력해주세요!');
+                return;
+            }
+            
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                alert('검색어를 입력해주세요!');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>검색 중...</p></div>';
+            resultsDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}?serviceKey=${API_KEY}&itemName=${encodeURIComponent(searchTerm)}&type=json&numOfRows=10`);
+                const data = await response.json();
+                
+                if (data.body && data.body.items) {
+                    displayResults(data.body.items, resultsDiv);
+                    addToSearchHistory(searchTerm);
+                    updateSearchStats(searchTerm);
+                } else {
+                    resultsDiv.innerHTML = '<p style="text-align: center; color: #666;">검색 결과가 없습니다. 다른 검색어로 시도해보세요.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = '<p style="text-align: center; color: #ff0000;">오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>';
+            }
+        }
+        
+        // 빠른 검색
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            searchMedicine();
+        }
+        
+        // 증상별 검색
+        async function searchBySymptom(symptom) {
+            if (!API_KEY) {
+                alert('먼저 API 키를 입력해주세요!');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('symptomResults');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>검색 중...</p></div>';
+            resultsDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}?serviceKey=${API_KEY}&efcyQesitm=${encodeURIComponent(symptom)}&type=json&numOfRows=10`);
+                const data = await response.json();
+                
+                if (data.body && data.body.items) {
+                    displayResults(data.body.items, resultsDiv);
+                    updateSearchStats(symptom);
+                } else {
+                    resultsDiv.innerHTML = '<p style="text-align: center; color: #666;">해당 증상에 대한 의약품을 찾을 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = '<p style="text-align: center; color: #ff0000;">오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>';
+            }
+        }
+        
+        // 검색 결과 표시
+        function displayResults(items, container) {
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">검색 결과가 없습니다.</p>';
+                return;
+            }
+            
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <div class="medicine-card">
+                        <div class="medicine-name">${item.itemName || '제품명 없음'}</div>
+                        <div class="medicine-company">제조사: ${item.entpName || '정보 없음'}</div>
+                        
+                        ${item.efcyQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">💊 효능·효과</div>
+                            <p>${item.efcyQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.useMethodQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">📋 사용법</div>
+                            <p>${item.useMethodQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.atpnWarnQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">⚠️ 주의사항</div>
+                            <p>${item.atpnWarnQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.atpnQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">❗ 주의사항(일반)</div>
+                            <p>${item.atpnQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.intrcQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">🔄 상호작용</div>
+                            <p>${item.intrcQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.seQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">😷 부작용</div>
+                            <p>${item.seQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${item.depositMethodQesitm ? `
+                        <div class="medicine-info">
+                            <div class="info-title">📦 보관법</div>
+                            <p>${item.depositMethodQesitm}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <button class="btn" onclick='saveToNotes(${JSON.stringify(item).replace(/'/g, "&#39;")})' style="margin-top: 15px;">
+                            💾 건강노트에 저장
+                        </button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 검색 기록 추가
+        function addToSearchHistory(term) {
+            const now = new Date();
+            searchHistory.unshift({
+                term: term,
+                date: now.toLocaleString()
+            });
+            
+            // 최대 10개까지만 보관
+            if (searchHistory.length > 10) {
+                searchHistory.pop();
+            }
+            
+            localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+            updateSearchHistory();
+        }
+        
+        // 검색 기록 업데이트
+        function updateSearchHistory() {
+            const historyDiv = document.getElementById('searchHistory');
+            if (searchHistory.length === 0) {
+                historyDiv.innerHTML = '<p style="color: #999;">아직 검색 기록이 없습니다.</p>';
+                return;
+            }
+            
+            let html = '';
+            searchHistory.forEach(item => {
+                html += `
+                    <div class="history-item">
+                        <span>${item.term}</span>
+                        <span style="color: #999; font-size: 0.9em;">${item.date}</span>
+                    </div>
+                `;
+            });
+            
+            historyDiv.innerHTML = html;
+        }
+        
+        // 건강노트에 저장
+        function saveToNotes(item) {
+            const now = new Date();
+            const noteItem = {
+                ...item,
+                savedDate: now.toLocaleString()
+            };
+            
+            // 중복 체크
+            const exists = savedNotes.some(note => note.itemName === item.itemName);
+            if (exists) {
+                alert('이미 저장된 의약품입니다!');
+                return;
+            }
+            
+            savedNotes.push(noteItem);
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+            updateSavedNotes();
+            alert('건강노트에 저장되었습니다!');
+        }
+        
+        // 저장된 노트 업데이트
+        function updateSavedNotes() {
+            const notesDiv = document.getElementById('savedNotes');
+            const savedCountSpan = document.getElementById('savedCount');
+            
+            if (savedNotes.length === 0) {
+                notesDiv.innerHTML = '<p style="color: #999;">아직 저장된 정보가 없습니다.</p>';
+                savedCountSpan.textContent = '0';
+                return;
+            }
+            
+            savedCountSpan.textContent = savedNotes.length;
+            
+            let html = '';
+            savedNotes.forEach((item, index) => {
+                html += `
+                    <div class="note-item">
+                        <button class="delete-note" onclick="deleteNote(${index})">삭제</button>
+                        <div class="note-date">${item.savedDate}</div>
+                        <h4>${item.itemName}</h4>
+                        <p>제조사: ${item.entpName || '정보 없음'}</p>
+                        ${item.efcyQesitm ? `<p><strong>효능:</strong> ${item.efcyQesitm.substring(0, 100)}...</p>` : ''}
+                    </div>
+                `;
+            });
+            
+            notesDiv.innerHTML = html;
+        }
+        
+        // 노트 삭제
+        function deleteNote(index) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                savedNotes.splice(index, 1);
+                localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+                updateSavedNotes();
+            }
+        }
+        
+        // 노트 다운로드
+        function downloadNotes() {
+            if (savedNotes.length === 0) {
+                alert('저장된 의약품 정보가 없습니다!');
+                return;
+            }
+            
+            let content = '=== 나의 건강노트 ===\n';
+            content += `작성일: ${new Date().toLocaleString()}\n\n`;
+            
+            savedNotes.forEach((item, index) => {
+                content += `\n--- ${index + 1}. ${item.itemName} ---\n`;
+                content += `저장일: ${item.savedDate}\n`;
+                content += `제조사: ${item.entpName || '정보 없음'}\n`;
+                if (item.efcyQesitm) content += `\n효능·효과:\n${item.efcyQesitm}\n`;
+                if (item.useMethodQesitm) content += `\n사용법:\n${item.useMethodQesitm}\n`;
+                if (item.atpnWarnQesitm) content += `\n주의사항:\n${item.atpnWarnQesitm}\n`;
+                if (item.intrcQesitm) content += `\n상호작용:\n${item.intrcQesitm}\n`;
+                if (item.seQesitm) content += `\n부작용:\n${item.seQesitm}\n`;
+                if (item.depositMethodQesitm) content += `\n보관법:\n${item.depositMethodQesitm}\n`;
+                content += '\n' + '='.repeat(50) + '\n';
+            });
+            
+            // 파일 다운로드
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `건강노트_${new Date().toISOString().split('T')[0]}.txt`;
+            link.click();
+        }
+        
+        // 검색 통계 업데이트
+        function updateSearchStats(keyword) {
+            const today = new Date().toDateString();
+            
+            // 날짜가 바뀌었으면 오늘 카운트 리셋
+            if (searchStats.lastDate !== today) {
+                searchStats.today = 0;
+                searchStats.lastDate = today;
+            }
+            
+            searchStats.total++;
+            searchStats.today++;
+            
+            // 키워드 카운트
+            if (searchStats.keywords[keyword]) {
+                searchStats.keywords[keyword]++;
+            } else {
+                searchStats.keywords[keyword] = 1;
+            }
+            
+            localStorage.setItem('searchStats', JSON.stringify(searchStats));
+            updateStats();
+        }
+        
+        // 통계 화면 업데이트
+        function updateStats() {
+            // 카운터 업데이트
+            document.getElementById('searchCount').textContent = searchStats.total;
+            document.getElementById('totalSearchStat').textContent = searchStats.total;
+            document.getElementById('todaySearchStat').textContent = searchStats.today;
+            document.getElementById('savedMedicineStat').textContent = savedNotes.length;
+            
+            // 가장 많이 검색한 약
+            let mostSearched = '-';
+            let maxCount = 0;
+            for (let key in searchStats.keywords) {
+                if (searchStats.keywords[key] > maxCount) {
+                    maxCount = searchStats.keywords[key];
+                    mostSearched = key;
+                }
+            }
+            document.getElementById('mostSearchedStat').textContent = mostSearched;
+            
+            // 레벨 계산 (10회 검색마다 레벨업)
+            const level = Math.floor(searchStats.total / 10);
+            let levelText = '초보 탐색자';
+            let progress = (searchStats.total % 10) * 10;
+            
+            if (level >= 5) {
+                levelText = '🏆 건강정보 마스터';
+                progress = 100;
+            } else if (level >= 3) {
+                levelText = '💎 건강정보 전문가';
+            } else if (level >= 2) {
+                levelText = '🌟 건강정보 탐험가';
+            } else if (level >= 1) {
+                levelText = '✨ 건강정보 수집가';
+            }
+            
+            document.getElementById('userLevel').textContent = levelText;
+            document.getElementById('levelProgress').style.width = progress + '%';
+            
+            // TOP 5 키워드
+            const sortedKeywords = Object.entries(searchStats.keywords)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            if (sortedKeywords.length > 0) {
+                let keywordHtml = '';
+                sortedKeywords.forEach((item, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                    keywordHtml += `
+                        <div style="padding: 10px; background: white; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>${medal} ${item[0]}</span>
+                            <span style="color: #667eea; font-weight: bold;">${item[1]}회</span>
+                        </div>
+                    `;
+                });
+                document.getElementById('topKeywords').innerHTML = keywordHtml;
+            }
+        }
+    </script>
+</body>
+</html>
