@@ -178,6 +178,13 @@
             transform: translateY(-3px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
+
+        .medicine-card::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
         
         .medicine-name {
             font-size: 1.3em;
@@ -690,6 +697,7 @@
             items.forEach(item => {
                 html += `
                     <div class="medicine-card">
+                        ${item.itemImage ? `<img src="${item.itemImage}" alt="약 이미지" style="width:120px; height:auto; border-radius:10px; float:right; margin-left:10px;">` : ''}
                         <div class="medicine-name">${item.itemName || '제품명 없음'}</div>
                         <div class="medicine-company">제조사: ${item.entpName || '정보 없음'}</div>
                         
